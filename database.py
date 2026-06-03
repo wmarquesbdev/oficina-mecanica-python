@@ -109,7 +109,7 @@ def seed():
     con.close()
 
 
-# ---------- AUTENTICACAO ----------
+#AUTENTICACAO
 def autenticar(login: str, senha: str):
     con = conectar()
     row = con.execute(
@@ -120,7 +120,7 @@ def autenticar(login: str, senha: str):
     return row
 
 
-# ---------- CLIENTES ----------
+#CLIENTES
 def listar_clientes():
     con = conectar()
     rows = con.execute("SELECT * FROM clientes ORDER BY nome").fetchall()
@@ -151,7 +151,7 @@ def excluir_cliente(id_):
     con.close()
 
 
-# ---------- CARROS ----------
+#CARROS
 def listar_carros():
     """Lista carros com o nome do cliente (JOIN)."""
     con = conectar()
@@ -192,7 +192,7 @@ def excluir_carro(id_):
     con.close()
 
 
-# ---------- SERVICOS ----------
+#SERVICOS
 def listar_servicos():
     con = conectar()
     rows = con.execute("SELECT * FROM servicos ORDER BY descricao").fetchall()
@@ -221,7 +221,7 @@ def excluir_servico(id_):
     con.close()
 
 
-# ---------- CARROS POR CLIENTE (para a tela de OS) ----------
+#CARROS POR CLIENTE (para a tela de OS)
 def listar_carros_por_cliente(cliente_id):
     con = conectar()
     rows = con.execute(
@@ -231,7 +231,7 @@ def listar_carros_por_cliente(cliente_id):
     return rows
 
 
-# ---------- ORDENS DE SERVICO ----------
+#ORDENS DE SERVICO
 def listar_ordens():
     """Lista as OS com nome do cliente, placa do carro e total calculado."""
     con = conectar()
@@ -307,7 +307,7 @@ def excluir_ordem(ordem_id):
 
 
 if __name__ == "__main__":
-    # Executar este arquivo cria o banco e popula o seed.
+    #executar este arquivo cria o banco e popula o seed.
     criar_tabelas()
     seed()
     print(f"Banco '{DB_NAME}' criado/atualizado com sucesso.")

@@ -9,7 +9,7 @@ from datetime import datetime
 import sqlite3
 import database as db
 
-# Paleta de cores
+#PALETA DE CORES
 COR_FUNDO = "#f0f2f5"
 COR_HEADER = "#1e3a5f"
 COR_CARD = "#ffffff"
@@ -18,7 +18,7 @@ COR_BOTAO_TXT = "#ffffff"
 COR_PERIGO = "#dc2626"
 
 
-# ===================== CRUD CLIENTES =====================
+#CRUD CLIENTES
 class TelaClientes(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
@@ -116,8 +116,7 @@ class TelaClientes(tk.Toplevel):
         for e in (self.e_nome, self.e_cpf, self.e_tel, self.e_email):
             e.delete(0, "end")
 
-
-# ===================== CRUD CARROS =====================
+#CRUD CARROS
 class TelaCarros(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
@@ -191,7 +190,7 @@ class TelaCarros(tk.Toplevel):
         v = self.tree.item(sel[0])["values"]
         self.id_sel = v[0]
         self.limpar(manter_id=True)
-        # localiza o carro completo para pegar cliente_id
+        #localiza o carro completo para pegar cliente_id
         for carro in db.listar_carros():
             if carro["id"] == v[0]:
                 for c in self.clientes:
@@ -240,7 +239,7 @@ class TelaCarros(tk.Toplevel):
             e.delete(0, "end")
 
 
-# ===================== CRUD SERVICOS =====================
+#CRUD SERVICOS
 class TelaServicos(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
@@ -335,7 +334,7 @@ class TelaServicos(tk.Toplevel):
         self.e_preco.delete(0, "end")
 
 
-# ===================== CRUD ORDENS DE SERVICO =====================
+#CRUD ORDENS DE SERVICO
 class TelaOrdens(tk.Toplevel):
     STATUS = ["Aberta", "Em andamento", "Concluida", "Cancelada"]
 
@@ -352,7 +351,7 @@ class TelaOrdens(tk.Toplevel):
         tk.Label(self, text="Ordens de Servico", font=("Arial", 16, "bold"),
                  bg=COR_FUNDO, fg=COR_HEADER).pack(pady=8)
 
-        # --- dados da OS ---
+        #dados da OS
         topo = tk.Frame(self, bg=COR_FUNDO)
         topo.pack(fill="x", padx=20)
         tk.Label(topo, text="Cliente", bg=COR_FUNDO, width=8, anchor="w").grid(row=0, column=0, sticky="w")
@@ -372,7 +371,7 @@ class TelaOrdens(tk.Toplevel):
         self.e_obs = tk.Entry(topo, width=31)
         self.e_obs.grid(row=1, column=3, pady=4)
 
-        # --- adicionar itens ---
+        #adicionar itens
         add = tk.Frame(self, bg=COR_FUNDO)
         add.pack(fill="x", padx=20, pady=(10, 0))
         tk.Label(add, text="Servico", bg=COR_FUNDO, width=8, anchor="w").grid(row=0, column=0, sticky="w")
@@ -388,7 +387,7 @@ class TelaOrdens(tk.Toplevel):
                   fg="white", font=("Arial", 10, "bold"), relief="flat",
                   cursor="hand2").grid(row=0, column=4)
 
-        # --- treeview itens ---
+        #treeview itens
         cols_i = ("descricao", "qtd", "preco", "subtotal")
         self.tree_itens = ttk.Treeview(self, columns=cols_i, show="headings", height=5)
         for c, larg in zip(cols_i, (380, 60, 120, 120)):
@@ -414,7 +413,7 @@ class TelaOrdens(tk.Toplevel):
                       font=("Arial", 10, "bold"), width=14, relief="flat",
                       cursor="hand2").pack(side="left", padx=5)
 
-        # --- treeview de OS existentes ---
+        #treeview de OS existentes
         tk.Label(self, text="Ordens cadastradas (clique para editar)", bg=COR_FUNDO,
                  fg="#374151").pack(anchor="w", padx=20)
         cols_o = ("id", "cliente", "placa", "data", "status", "total")
@@ -427,7 +426,7 @@ class TelaOrdens(tk.Toplevel):
 
         self.carregar_os()
 
-    # ---- helpers ----
+    #helpers
     def atualizar_carros(self, _=None):
         cid = self._id_combo(self.cb_cliente)
         carros = db.listar_carros_por_cliente(cid) if cid else []
@@ -489,7 +488,7 @@ class TelaOrdens(tk.Toplevel):
         oid = self.tree_os.item(sel[0])["values"][0]
         self.id_sel = oid
         ordem = next(o for o in db.listar_ordens() if o["id"] == oid)
-        # cliente e carro
+        #cliente e carro
         for c in self.clientes:
             if c["id"] == ordem["cliente_id"]:
                 self.cb_cliente.set(f"{c['id']} - {c['nome']}")
@@ -500,7 +499,7 @@ class TelaOrdens(tk.Toplevel):
         self.cb_status.set(ordem["status"])
         self.e_obs.delete(0, "end")
         self.e_obs.insert(0, ordem["observacoes"] or "")
-        # itens
+        #itens
         self.itens = [{"servico_id": i["servico_id"], "descricao": i["descricao"],
                        "quantidade": i["quantidade"], "preco_unit": i["preco_unit"]}
                       for i in db.listar_itens_da_ordem(oid)]
@@ -544,7 +543,7 @@ class TelaOrdens(tk.Toplevel):
         self._render_itens()
 
 
-# ===================== MENU PRINCIPAL =====================
+#MENU PRINCIPAL
 class MenuPrincipal:
     def __init__(self, root, usuario):
         self.root = root
@@ -585,7 +584,7 @@ class MenuPrincipal:
             w.configure(cursor="hand2")
 
 
-# ===================== LOGIN =====================
+#LOGIN
 class TelaLogin(tk.Toplevel):
     def __init__(self, root):
         super().__init__(root)
@@ -628,7 +627,7 @@ def main():
     db.criar_tabelas()
     db.seed()
     root = tk.Tk()
-    root.withdraw()  # esconde a janela principal ate o login (padrao do material)
+    root.withdraw()
     TelaLogin(root)
     root.mainloop()
 
