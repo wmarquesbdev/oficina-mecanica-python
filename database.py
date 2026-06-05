@@ -1,23 +1,16 @@
-"""
-database.py - Camada de acesso a dados (SQLite) do Sistema Oficina.
-Cria o banco oficina.db, as tabelas, o seed inicial e expoe funcoes CRUD.
-"""
 import sqlite3
 import hashlib
 
 DB_NAME = "oficina.db"
 
-
 def conectar():
     con = sqlite3.connect(DB_NAME)
     con.execute("PRAGMA foreign_keys = ON")
-    con.row_factory = sqlite3.Row  # acesso por nome de coluna
+    con.row_factory = sqlite3.Row
     return con
-
 
 def hash_senha(senha: str) -> str:
     return hashlib.sha256(senha.encode("utf-8")).hexdigest()
-
 
 def criar_tabelas():
     con = conectar()
@@ -85,9 +78,7 @@ def criar_tabelas():
     con.commit()
     con.close()
 
-
 def seed():
-    """Insere dados iniciais apenas se as tabelas estiverem vazias."""
     con = conectar()
     cur = con.cursor()
 
@@ -97,10 +88,10 @@ def seed():
 
     if cur.execute("SELECT COUNT(*) FROM servicos").fetchone()[0] == 0:
         servicos = [
-            ("Troca de oleo", 120.00),
+            ("Troca de óleo", 120.00),
             ("Alinhamento e balanceamento", 90.00),
             ("Troca de pastilha de freio", 180.00),
-            ("Revisao geral", 350.00),
+            ("Revisão geral", 350.00),
             ("Troca de correia dentada", 450.00),
         ]
         cur.executemany("INSERT INTO servicos (descricao, preco) VALUES (?,?)", servicos)
@@ -108,8 +99,6 @@ def seed():
     con.commit()
     con.close()
 
-
-#AUTENTICACAO
 def autenticar(login: str, senha: str):
     con = conectar()
     row = con.execute(
@@ -119,14 +108,11 @@ def autenticar(login: str, senha: str):
     con.close()
     return row
 
-
-#CLIENTES
 def listar_clientes():
     con = conectar()
     rows = con.execute("SELECT * FROM clientes ORDER BY nome").fetchall()
     con.close()
     return rows
-
 
 def inserir_cliente(nome, cpf, telefone, email):
     con = conectar()
@@ -135,7 +121,6 @@ def inserir_cliente(nome, cpf, telefone, email):
     con.commit()
     con.close()
 
-
 def atualizar_cliente(id_, nome, cpf, telefone, email):
     con = conectar()
     con.execute("UPDATE clientes SET nome=?, cpf=?, telefone=?, email=? WHERE id=?",
@@ -143,17 +128,15 @@ def atualizar_cliente(id_, nome, cpf, telefone, email):
     con.commit()
     con.close()
 
-
 def excluir_cliente(id_):
     con = conectar()
-    con.execute("DELETE FROM clientes WHERE id=?", (id_,))
-    con.commit()
-    con.close()
+    try:
+        con.execute("DELETE FROM clientes WHERE id=?", (id_,))
+        con.commit()
+    finally:
+        con.close()
 
-
-#CARROS
 def listar_carros():
-    """Lista carros com o nome do cliente (JOIN)."""
     con = conectar()
     rows = con.execute("""
         SELECT carros.id, clientes.nome AS cliente, carros.placa,
@@ -166,7 +149,6 @@ def listar_carros():
     con.close()
     return rows
 
-
 def inserir_carro(cliente_id, placa, marca, modelo, ano, cor):
     con = conectar()
     con.execute("""INSERT INTO carros (cliente_id, placa, marca, modelo, ano, cor)
@@ -174,7 +156,6 @@ def inserir_carro(cliente_id, placa, marca, modelo, ano, cor):
                 (cliente_id, placa, marca, modelo, ano, cor))
     con.commit()
     con.close()
-
 
 def atualizar_carro(id_, cliente_id, placa, marca, modelo, ano, cor):
     con = conectar()
@@ -184,21 +165,19 @@ def atualizar_carro(id_, cliente_id, placa, marca, modelo, ano, cor):
     con.commit()
     con.close()
 
-
 def excluir_carro(id_):
     con = conectar()
-    con.execute("DELETE FROM carros WHERE id=?", (id_,))
-    con.commit()
-    con.close()
+    try:
+        con.execute("DELETE FROM carros WHERE id=?", (id_,))
+        con.commit()
+    finally:
+        con.close()
 
-
-#SERVICOS
 def listar_servicos():
     con = conectar()
     rows = con.execute("SELECT * FROM servicos ORDER BY descricao").fetchall()
     con.close()
     return rows
-
 
 def inserir_servico(descricao, preco):
     con = conectar()
@@ -206,22 +185,20 @@ def inserir_servico(descricao, preco):
     con.commit()
     con.close()
 
-
 def atualizar_servico(id_, descricao, preco):
     con = conectar()
     con.execute("UPDATE servicos SET descricao=?, preco=? WHERE id=?", (descricao, preco, id_))
     con.commit()
     con.close()
 
-
 def excluir_servico(id_):
     con = conectar()
-    con.execute("DELETE FROM servicos WHERE id=?", (id_,))
-    con.commit()
-    con.close()
+    try:
+        con.execute("DELETE FROM servicos WHERE id=?", (id_,))
+        con.commit()
+    finally:
+        con.close()
 
-
-#CARROS POR CLIENTE (para a tela de OS)
 def listar_carros_por_cliente(cliente_id):
     con = conectar()
     rows = con.execute(
@@ -230,10 +207,7 @@ def listar_carros_por_cliente(cliente_id):
     con.close()
     return rows
 
-
-#ORDENS DE SERVICO
 def listar_ordens():
-    """Lista as OS com nome do cliente, placa do carro e total calculado."""
     con = conectar()
     rows = con.execute("""
         SELECT o.id, c.nome AS cliente, car.placa, o.data_abertura, o.status,
@@ -248,7 +222,6 @@ def listar_ordens():
     con.close()
     return rows
 
-
 def listar_itens_da_ordem(ordem_id):
     con = conectar()
     rows = con.execute("""
@@ -261,9 +234,7 @@ def listar_itens_da_ordem(ordem_id):
     con.close()
     return rows
 
-
 def inserir_ordem(cliente_id, carro_id, data_abertura, status, observacoes, itens):
-    """itens = lista de dicts: {servico_id, quantidade, preco_unit}"""
     con = conectar()
     cur = con.cursor()
     cur.execute("""INSERT INTO ordens_servico
@@ -279,9 +250,7 @@ def inserir_ordem(cliente_id, carro_id, data_abertura, status, observacoes, iten
     con.close()
     return ordem_id
 
-
 def atualizar_ordem(ordem_id, cliente_id, carro_id, status, observacoes, itens):
-    """Atualiza a OS e regrava os itens (apaga os antigos e insere os novos)."""
     con = conectar()
     cur = con.cursor()
     cur.execute("""UPDATE ordens_servico
@@ -296,7 +265,6 @@ def atualizar_ordem(ordem_id, cliente_id, carro_id, status, observacoes, itens):
     con.commit()
     con.close()
 
-
 def excluir_ordem(ordem_id):
     con = conectar()
     cur = con.cursor()
@@ -305,9 +273,96 @@ def excluir_ordem(ordem_id):
     con.commit()
     con.close()
 
+def listar_usuarios():
+    con = conectar()
+    rows = con.execute("SELECT id, nome, login FROM usuarios ORDER BY nome").fetchall()
+    con.close()
+    return rows
+
+def inserir_usuario(nome, login, senha):
+    con = conectar()
+    try:
+        con.execute("INSERT INTO usuarios (nome, login, senha) VALUES (?,?,?)",
+                    (nome, login, hash_senha(senha)))
+        con.commit()
+    finally:
+        con.close()
+
+def atualizar_usuario(id_, nome, login, senha=None):
+    con = conectar()
+    try:
+        if senha:
+            con.execute("UPDATE usuarios SET nome=?, login=?, senha=? WHERE id=?",
+                        (nome, login, hash_senha(senha), id_))
+        else:
+            con.execute("UPDATE usuarios SET nome=?, login=? WHERE id=?", (nome, login, id_))
+        con.commit()
+    finally:
+        con.close()
+
+def excluir_usuario(id_):
+    con = conectar()
+    con.execute("DELETE FROM usuarios WHERE id=?", (id_,))
+    con.commit()
+    con.close()
+
+def contar_usuarios():
+    con = conectar()
+    n = con.execute("SELECT COUNT(*) FROM usuarios").fetchone()[0]
+    con.close()
+    return n
+
+def resumo_dashboard():
+    con = conectar()
+    cur = con.cursor()
+    r = {
+        "clientes": cur.execute("SELECT COUNT(*) FROM clientes").fetchone()[0],
+        "carros":   cur.execute("SELECT COUNT(*) FROM carros").fetchone()[0],
+        "servicos": cur.execute("SELECT COUNT(*) FROM servicos").fetchone()[0],
+        "ordens":   cur.execute("SELECT COUNT(*) FROM ordens_servico").fetchone()[0],
+    }
+    r["faturamento"] = cur.execute("""
+        SELECT COALESCE(SUM(i.quantidade * i.preco_unit), 0)
+        FROM os_itens i
+        JOIN ordens_servico o ON i.ordem_id = o.id
+        WHERE o.status = 'Concluida'
+    """).fetchone()[0]
+    linhas = cur.execute(
+        "SELECT status, COUNT(*) FROM ordens_servico GROUP BY status").fetchall()
+    r["por_status"] = {row[0]: row[1] for row in linhas}
+    con.close()
+    return r
+
+def itens_resumo_texto(ordem_id):
+    con = conectar()
+    o = con.execute("""
+        SELECT o.id, c.nome AS cliente, car.placa, car.modelo, o.data_abertura,
+               o.status, o.observacoes
+        FROM ordens_servico o
+        JOIN clientes c  ON o.cliente_id = c.id
+        JOIN carros  car ON o.carro_id   = car.id
+        WHERE o.id = ?""", (ordem_id,)).fetchone()
+    itens = listar_itens_da_ordem(ordem_id)
+    con.close()
+    if not o:
+        return ""
+    linhas = [
+        f"ORDEM DE SERVICO Nº {o['id']}",
+        f"Cliente: {o['cliente']}",
+        f"Veiculo: {o['placa']} ({o['modelo']})",
+        f"Data: {o['data_abertura']}    Status: {o['status']}",
+        f"Observacoes: {o['observacoes'] or '-'}",
+        "-" * 48, "SERVICOS:",
+    ]
+    total = 0
+    for it in itens:
+        sub = it["quantidade"] * it["preco_unit"]
+        total += sub
+        linhas.append(f"  {it['quantidade']}x {it['descricao']:<28} R$ {sub:>8.2f}")
+    linhas += ["-" * 48, f"TOTAL: R$ {total:.2f}"]
+    return "\n".join(linhas)
 
 if __name__ == "__main__":
-    #executar este arquivo cria o banco e popula o seed.
     criar_tabelas()
     seed()
     print(f"Banco '{DB_NAME}' criado/atualizado com sucesso.")
